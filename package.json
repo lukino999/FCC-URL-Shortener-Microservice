@@ -4,7 +4,8 @@
 	"description": "API project for freeCodeCamp",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server.js"
+		"start": "node server.js",
+		"start-watch": "nodemon ./"
 	},
 	"dependencies": {
 		"express": "^4.17.1",
@@ -14,7 +15,7 @@
 		"body-parser": "^1.19.0"
 	},
 	"engines": {
-		"node": "10.17.0"
+		"node": "10.16.3"
 	},
 	"repository": {
 		"type": "git",
@@ -25,5 +26,8 @@
 		"hyperdev",
 		"express"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"nodemon": "^2.0.4"
+	}
 }
