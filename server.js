@@ -5,6 +5,7 @@ var mongo = require('mongodb');
 var mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const urlExists = require('url-exists');
+require('dotenv').config();
 
 
 var cors = require('cors');
@@ -16,6 +17,10 @@ var port = process.env.PORT || 3000;
 
 /** this project needs a db !! **/
 // mongoose.connect(process.env.DB_URI);
+mongoose.connect(process.env.DB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 app.use(cors());
 
@@ -40,9 +45,17 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: 'hello API' });
 });
 
+// setup Model
+const shortUrlSchema = new mongoose.Schema({
+  original_url: String,
+  short_url: Number
+})
+const ShortUrlModel = mongoose.model('ShortUrl', shortUrlSchema);
+
+
 //
 app.post('/api/shorturl/new', (req, res) => {
-  const url = req.body.url
+  const url = req.body.url;
   console.log('url', url);
   if (typeof url === 'undefined') {
     res.json({ error: 'missing url in request\'s body' })
@@ -56,7 +69,31 @@ app.post('/api/shorturl/new', (req, res) => {
     } else {
       console.log('urlExists exists', exists);
       if (exists) {
-        res.json({ original_url: url });
+
+        ShortUrlModel.countDocuments({}, (err, count) => {
+          if (err) {
+            // error counting documents
+            console.log('ShortUrlModel.count err', err);
+            res.status(500).json({ error: 'internal error' });
+            return;
+          }
+
+          // success
+          console.log('ShortUrlModel.count count', count);
+
+          new ShortUrlModel({ original_url: url, short_url: count + 1 }).save()
+            .then(doc => {
+              if (!doc || doc.length === 0) {
+                return res.status(500).json({ error: 'internal error' });
+              }
+              res.json({ original_url: doc.original_url, short_url: doc.short_url });
+            })
+            .catch(err => {
+              res.status(500).json(err);
+            });
+
+        })
+
       } else {
         res.json({ error: 'invalid URL' });
       }
