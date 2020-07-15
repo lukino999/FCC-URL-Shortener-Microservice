@@ -78,7 +78,6 @@ app.post('/api/shorturl/new', (req, res) => {
             return;
           }
 
-
           if (doc) {
             // url already exists
             res.json({ original_url: doc.original_url, short_url: doc.short_url });
@@ -104,18 +103,33 @@ app.post('/api/shorturl/new', (req, res) => {
                 .catch(err => {
                   res.status(500).json(err);
                 });
-            })
+            });
           }
-        })
+        });
 
       } else {
         res.json({ error: 'invalid URL' });
       }
     }
+  });
+});
+
+app.get('/api/shorturl/:short_url', (req, res) => {
+  ShortUrlModel.findOne({ short_url: req.params.short_url }, (err, doc) => {
+    if (err) {
+      console.log('ShortUrlModel.findOne err:', err);
+      res.status(500).json({ error: 'internal error' });
+      return;
+    }
+
+    if (doc) {
+      // url  exists
+      res.redirect(doc.original_url);
+    } else {
+      res.json({ error: 'No short URL found for the given input' })
+    }
   })
-
 })
-
 
 app.listen(port, function () {
   console.log('Node.js listening at port', port);
