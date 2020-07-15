@@ -55,7 +55,6 @@ const ShortUrlModel = mongoose.model('ShortUrl', shortUrlSchema);
 //
 app.post('/api/shorturl/new', (req, res) => {
   const url = req.body.url;
-  console.log('url', url);
   if (typeof url === 'undefined') {
     res.json({ error: 'invalid URL' });
     return;
@@ -66,7 +65,6 @@ app.post('/api/shorturl/new', (req, res) => {
       console.log('urlExists err', err);
       res.json({ error: 'internal error' });
     } else {
-      console.log('urlExists exists', exists);
       if (exists) {
 
         // check if url already in DB
