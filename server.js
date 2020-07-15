@@ -58,8 +58,8 @@ app.post('/api/shorturl/new', (req, res) => {
   const url = req.body.url;
   console.log('url', url);
   if (typeof url === 'undefined') {
-    res.json({ error: 'missing url in request\'s body' })
-    return
+    res.json({ error: 'invalid URL' });
+    return;
   }
 
   urlExists(url, (err, exists) => {
@@ -70,28 +70,42 @@ app.post('/api/shorturl/new', (req, res) => {
       console.log('urlExists exists', exists);
       if (exists) {
 
-        ShortUrlModel.countDocuments({}, (err, count) => {
+        // check if url already in DB
+        ShortUrlModel.findOne({ original_url: url }, (err, doc) => {
           if (err) {
-            // error counting documents
-            console.log('ShortUrlModel.count err', err);
+            console.log('ShortUrlModel.findOne err:', err);
             res.status(500).json({ error: 'internal error' });
             return;
           }
 
-          // success
-          console.log('ShortUrlModel.count count', count);
 
-          new ShortUrlModel({ original_url: url, short_url: count + 1 }).save()
-            .then(doc => {
-              if (!doc || doc.length === 0) {
-                return res.status(500).json({ error: 'internal error' });
+          if (doc) {
+            // url already exists
+            res.json({ original_url: doc.original_url, short_url: doc.short_url });
+          } else {
+            // create new
+            // count total
+            ShortUrlModel.countDocuments({}, (err, count) => {
+              if (err) {
+                // error counting documents
+                console.log('ShortUrlModel.count err', err);
+                res.status(500).json({ error: 'internal error' });
+                return;
               }
-              res.json({ original_url: doc.original_url, short_url: doc.short_url });
-            })
-            .catch(err => {
-              res.status(500).json(err);
-            });
 
+              // create new record and save
+              new ShortUrlModel({ original_url: url, short_url: count + 1 }).save()
+                .then(doc => {
+                  if (!doc || doc.length === 0) {
+                    return res.status(500).json({ error: 'internal error' });
+                  }
+                  res.json({ original_url: doc.original_url, short_url: doc.short_url });
+                })
+                .catch(err => {
+                  res.status(500).json(err);
+                });
+            })
+          }
         })
 
       } else {
