@@ -4,6 +4,8 @@ var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const urlExists = require('url-exists');
+
 
 var cors = require('cors');
 
@@ -40,8 +42,27 @@ app.get("/api/hello", function (req, res) {
 
 //
 app.post('/api/shorturl/new', (req, res) => {
-  console.log(req.body);
-  res.json(req.body);
+  const url = req.body.url
+  console.log('url', url);
+  if (typeof url === 'undefined') {
+    res.json({ error: 'missing url in request\'s body' })
+    return
+  }
+
+  urlExists(url, (err, exists) => {
+    if (err) {
+      console.log('urlExists err', err);
+      res.json({ error: 'internal error' });
+    } else {
+      console.log('urlExists exists', exists);
+      if (exists) {
+        res.json({ original_url: url });
+      } else {
+        res.json({ error: 'invalid URL' });
+      }
+    }
+  })
+
 })
 
 
