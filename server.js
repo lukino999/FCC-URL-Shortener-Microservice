@@ -1,7 +1,6 @@
 'use strict';
 
 var express = require('express');
-var mongo = require('mongodb');
 var mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const urlExists = require('url-exists');
