@@ -48,8 +48,25 @@ li {
   margin-bottom: 1em;
 }
 
-a {
+/* unvisited link */
+a:link {
 	color: #2574A9;
+	text-decoration: none;
+}
+
+/* visited link */
+a:visited {
+  color: #2574A9;
+}
+
+/* mouse over link */
+a:hover {
+  color: hotpink;
+}
+
+/* selected link */
+a:active {
+  color: #2574A9;
 }
 
 form {
